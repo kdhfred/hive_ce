@@ -29,7 +29,7 @@ class BinaryWriterImpl extends BinaryWriter {
 
   /// Not part of public API
   BinaryWriterImpl(TypeRegistry typeRegistry)
-      : _typeRegistry = typeRegistry as TypeRegistryImpl;
+    : _typeRegistry = typeRegistry as TypeRegistryImpl;
 
   /// Not part of public API
   @visibleForTesting
@@ -44,7 +44,7 @@ class BinaryWriterImpl extends BinaryWriter {
   }
 
   void _increaseBufferSize(int count) {
-// We will create a list in the range of 2-4 times larger than required.
+    // We will create a list in the range of 2-4 times larger than required.
     final newSize = _pow2roundup((_offset + count) * 2);
     final newBuffer = Uint8List(newSize);
     newBuffer.setRange(0, _offset, _buffer);
@@ -94,7 +94,9 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @override
   void writeInt(int value) {
-    writeDouble(value.toDouble());
+    _reserveBytes(8);
+    _byteData.setInt64(_offset, value, Endian.little);
+    _offset += 8;
   }
 
   @override
@@ -139,7 +141,7 @@ class BinaryWriterImpl extends BinaryWriter {
     _reserveBytes(length * 8);
     final byteData = _byteData;
     for (var i = 0; i < length; i++) {
-      byteData.setFloat64(_offset, list[i].toDouble(), Endian.little);
+      byteData.setInt64(_offset, list[i], Endian.little);
       _offset += 8;
     }
   }
@@ -320,8 +322,10 @@ class BinaryWriterImpl extends BinaryWriter {
     } else {
       final resolved = _typeRegistry.findAdapterForValue(value);
       if (resolved == null) {
-        throw HiveError('Cannot write, unknown type: ${value.runtimeType}. '
-            'Did you forget to register an adapter?');
+        throw HiveError(
+          'Cannot write, unknown type: ${value.runtimeType}. '
+          'Did you forget to register an adapter?',
+        );
       }
       typeId = resolved.typeId;
       write = () => resolved.adapter.write(this, value);

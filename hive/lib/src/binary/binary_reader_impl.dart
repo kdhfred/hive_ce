@@ -21,10 +21,10 @@ class BinaryReaderImpl extends BinaryReader {
 
   /// Not part of public API
   BinaryReaderImpl(this._buffer, TypeRegistry typeRegistry, [int? bufferLength])
-      : _byteData = ByteData.view(_buffer.buffer, _buffer.offsetInBytes),
-        _bufferLength = bufferLength ?? _buffer.length,
-        _bufferLimit = bufferLength ?? _buffer.length,
-        _typeRegistry = typeRegistry as TypeRegistryImpl;
+    : _byteData = ByteData.view(_buffer.buffer, _buffer.offsetInBytes),
+      _bufferLength = bufferLength ?? _buffer.length,
+      _bufferLimit = bufferLength ?? _buffer.length,
+      _typeRegistry = typeRegistry as TypeRegistryImpl;
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
@@ -112,7 +112,10 @@ class BinaryReaderImpl extends BinaryReader {
 
   @override
   int readInt() {
-    return readDouble().toInt();
+    _requireBytes(8);
+    final value = _byteData.getInt64(_offset, Endian.little);
+    _offset += 8;
+    return value.toInt();
   }
 
   @override
@@ -154,7 +157,7 @@ class BinaryReaderImpl extends BinaryReader {
     final byteData = _byteData;
     final list = List<int>.filled(length, 0, growable: true);
     for (var i = 0; i < length; i++) {
-      list[i] = byteData.getFloat64(_offset, Endian.little).toInt();
+      list[i] = byteData.getInt64(_offset, Endian.little).toInt();
       _offset += 8;
     }
     return list;
