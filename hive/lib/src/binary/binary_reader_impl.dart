@@ -112,7 +112,10 @@ class BinaryReaderImpl extends BinaryReader {
 
   @override
   int readInt() {
-    return readDouble().toInt();
+    _requireBytes(8);
+    final value = _byteData.getInt64(_offset, Endian.little);
+    _offset += 8;
+    return value;
   }
 
   @override
@@ -154,7 +157,7 @@ class BinaryReaderImpl extends BinaryReader {
     final byteData = _byteData;
     final list = List<int>.filled(length, 0, growable: true);
     for (var i = 0; i < length; i++) {
-      list[i] = byteData.getFloat64(_offset, Endian.little).toInt();
+      list[i] = byteData.getInt64(_offset, Endian.little);
       _offset += 8;
     }
     return list;
