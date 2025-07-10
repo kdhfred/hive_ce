@@ -104,9 +104,9 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @override
   void writeInt(int value) {
-    // Web truncates values greater than 2^53 to 2^53
-    if (kDebugMode && value >= maxInt) debugPrint(intWarning);
-    writeDouble(value.toDouble());
+    _reserveBytes(8);
+    _byteData.setInt64(_offset, value, Endian.little);
+    _offset += 8;
   }
 
   @override
@@ -151,7 +151,7 @@ class BinaryWriterImpl extends BinaryWriter {
     _reserveBytes(length * 8);
     final byteData = _byteData;
     for (var i = 0; i < length; i++) {
-      byteData.setFloat64(_offset, list[i].toDouble(), Endian.little);
+      byteData.setInt64(_offset, list[i], Endian.little);
       _offset += 8;
     }
   }
